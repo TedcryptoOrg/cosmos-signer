@@ -5,4 +5,5 @@ export interface Network {
   txTimeout: number
   coinType: number
   chainId: string
+  restUrl: string
 }
