@@ -1,10 +1,10 @@
-import { type Network } from '../types/Network'
 import { Wallet } from '@ethersproject/wallet'
 import { EthSigner } from './EthSigner'
 import { Slip10RawIndex, pathToString } from '@cosmjs/crypto'
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing'
 import { type SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { type AccountData } from '@cosmjs/proto-signing/build/signer'
+import { type Chain } from '@tedcryptoorg/cosmos-directory'
 
 export class Signer {
   constructor (
@@ -40,26 +40,26 @@ export class Signer {
     return await this.signer.signDirect(_address, signDoc)
   }
 
-  public static async createSigner (network: Network, mnemonic: string): Promise<Signer> {
+  public static async createSigner (chain: Chain, mnemonic: string): Promise<Signer> {
     const hdPath = [
       Slip10RawIndex.hardened(44),
-      Slip10RawIndex.hardened(network.coinType),
+      Slip10RawIndex.hardened(chain.slip44),
       Slip10RawIndex.hardened(0),
       Slip10RawIndex.normal(0),
       Slip10RawIndex.normal(0)
     ]
-    if (network.coinType !== 118) {
+    if (chain.slip44 !== 118) {
       console.log('Using HD Path', pathToString(hdPath))
     }
 
     const signer = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
-      prefix: network.prefix,
+      prefix: chain.bech32_prefix,
       hdPaths: [hdPath]
     })
 
-    if (network.coinType === 60) {
+    if (chain.slip44 === 60) {
       const ethSigner = Wallet.fromMnemonic(mnemonic)
-      return new Signer(new EthSigner(signer, ethSigner, network.prefix))
+      return new Signer(new EthSigner(signer, ethSigner, chain.bech32_prefix))
     }
 
     return new Signer(signer)
