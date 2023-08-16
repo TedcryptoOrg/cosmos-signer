@@ -3,7 +3,7 @@
   "version": "0.0.4",
   "description": "Cosmos Signer - A library for signing transactions for Cosmos SDK chains",
   "scripts": {
-    "test": "jest --passWithNoTests`",
+    "test": "jest --passWithNoTests",
     "clean": "rm -rf ./lib",
     "build": "npm run clean && npm run build:cjs",
     "build:cjs": "tsc -p ./configs/tsconfig.cjs.json",
@@ -21,7 +21,7 @@
     "@cosmjs/proto-signing": "^0.29.5",
     "@cosmjs/stargate": "^0.29.5",
     "@cosmjs/utils": "^0.29.5",
-    "@tedcryptoorg/cosmos-directory": "^0.0.5",
+    "@tedcryptoorg/cosmos-directory": "^0.1.1",
     "axios": "^1.2.5",
     "axios-retry": "^3.4.0",
     "compare-versions": "^6.0.0-rc.1",
