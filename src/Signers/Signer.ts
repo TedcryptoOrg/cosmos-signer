@@ -4,7 +4,7 @@ import { Slip10RawIndex, pathToString } from '@cosmjs/crypto'
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing'
 import { type SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { type AccountData } from '@cosmjs/proto-signing/build/signer'
-import {Chain} from "@tedcryptoorg/cosmos-directory";
+import { type Chain } from '@tedcryptoorg/cosmos-directory'
 
 export class Signer {
   constructor (
