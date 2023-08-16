@@ -12,6 +12,7 @@ import { makeSignDoc, Registry } from "@cosmjs/proto-signing";
 import {parseTxResult} from "./util/TransactionHelper";
 import {sleep} from "./util/Sleep";
 import {Signer} from "./Signers/Signer";
+import { type DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient'
 
 const mathjs = require('mathjs');
 const Long = require('long');
@@ -140,7 +141,7 @@ export class SigningClient {
         }
     }
 
-    async broadcast(txBody: any){
+    async broadcast(txBody: any): Promise<DeliverTxResponse> {
         const timeoutMs = this.network.txTimeout || 60_000
         const pollIntervalMs = 3_000
         let timedOut = false
