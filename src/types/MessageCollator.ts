@@ -1,6 +1,6 @@
-import {Message} from "./Message";
+import { type Message } from './Message'
 
-export type MessageCollator = {
-    grantee: string,
-    messages: Message[]
+export interface MessageCollator {
+  grantee: string
+  messages: Message[]
 }
