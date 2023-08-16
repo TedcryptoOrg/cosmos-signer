@@ -1,11 +1,12 @@
 import {ChainDirectory} from "@tedcryptoorg/cosmos-directory";
 import {SigningClient} from "../../src";
 import {GasPrice} from "@cosmjs/stargate";
+import {createSigner} from "../Helper/fixedValues";
 
 describe('SigningClient', () => {
     it('should be able to create a signing client from a chain directory', async () => {
         const chain = (await new ChainDirectory().getChainData('osmosis')).chain;
-        const signer = {};
+        const signer = await createSigner('osmosis');
 
         const signingClient = await SigningClient.createWithChain(chain, GasPrice.fromString('0uosmo'), signer);
         expect(signingClient).toBeInstanceOf(SigningClient);
