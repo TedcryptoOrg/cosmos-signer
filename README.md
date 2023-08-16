@@ -5,6 +5,14 @@ sign and broadcast transactions easily without having to worry about the network
 
 ## How to use
 
+Install:
+
+```js
+npm i @tedcryptoorg/cosmos-signer
+```
+
+Simple code example:
+
 ```js
 import {SigningClient} from '@tedcryptoorg/cosmos-signer';
 import {coins, coin} from "@cosmjs/launchpad";
@@ -42,13 +50,7 @@ const messages: Message[] = [{
 
 const network = Network.createFromChain('juno-1')
 const signer = new SigningClient(network, GasPrice.fromString('0.025ujuno'), window.keplr);
-try {
-    gasFee = await signer.simulate(address, messages)
-} catch (error) {
-    throw new Error('Failed to simulate gas fees. Please try again.')
-}
+const result = signer.signAndBroadcast(address, messages, 0); // 0 fee, let it simulate before broadcast (or use .simulate fn)
 
-
-const result = signer.signAndBroadcast(address, messages, gasFee);
 console.log(result)
 ```
