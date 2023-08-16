@@ -1,23 +1,27 @@
-import { Amino } from './Amino';
+import { Network } from './Network';
 import { Registry } from './Registry';
+import { EthSigner } from './Signers/EthSigner';
+import { Signer } from './Signers/Signer';
 import { SigningClient } from './SigningClient';
 import { AminoMessageCollator } from './types/AminoMessageCollator';
 import { Message } from "./types/Message";
 import { MessageCollator } from "./types/MessageCollator";
-import { Network } from "./types/Network";
+import { type Network as NetworkData } from "./types/Network";
 import { coin } from './util/Coin';
 import { parseTxResult } from './util/TransactionHelper';
 
 export {
     // classes
     SigningClient,
-    Amino,
     Registry,
+    EthSigner,
+    Signer,
+    Network,
     // types
     AminoMessageCollator,
     Message,
     MessageCollator,
-    Network,
+    NetworkData,
     // functions
     coin,
     parseTxResult

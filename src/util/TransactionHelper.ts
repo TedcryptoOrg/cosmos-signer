@@ -8,8 +8,8 @@ export function parseTxResult (result: any): DeliverTxResponse {
     transactionHash: result.txhash,
     gasUsed: result.gas_used,
     gasWanted: result.gas_wanted,
-    // todo
-    data: [],
-    events: []
+    events: [],
+    txIndex: 0,
+    msgResponses: []
   }
 }
