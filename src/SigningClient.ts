@@ -1,6 +1,5 @@
 import {Network} from "./types/Network";
 import axios from "axios";
-import {Chain, CosmosDirectory} from "@tedcryptoorg/cosmos-directory";
 import {assertIsDeliverTxSuccess, GasPrice} from "@cosmjs/stargate";
 import {coin} from "./util/Coin";
 import {Message} from "./types/Message";
@@ -27,19 +26,6 @@ export class SigningClient {
         private defaultGasModifier: number = 1.5
     ) {
         this.registry = require('./Registry').registry.getProtoSigningRegistry();
-    }
-
-    static async createWithChain(chain: Chain, defaultGasPrice: GasPrice, signer: Signer, restUrl: string|undefined = undefined, defaultGasModifier: number = 1.5): Promise<SigningClient> {
-        return new SigningClient(
-            {
-                chain_name: chain.name,
-                authzAminoSupport: chain.params.authz ?? false,
-                prefix: chain.bech32_prefix,
-                txTimeout: 1000,
-                coinType: chain.slip44,
-                chainId: chain.chain_id,
-                restUrl: restUrl ?? new CosmosDirectory().restUrl(chain.chain_name),
-            }, defaultGasPrice, signer, defaultGasModifier)
     }
 
     async getAccount(address: string) {
