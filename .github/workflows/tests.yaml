@@ -24,8 +24,10 @@ jobs:
           node-version: lts/*
 
       - name: Install modules
-        run: |
-          npm install
+        run: npm install
+
+      - name: Build
+        run: npm run build
 
       - name: Run tests
         run: npm test
