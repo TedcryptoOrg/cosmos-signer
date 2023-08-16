@@ -1,6 +1,6 @@
-import protobuf from "protobufjs";
+import type protobuf from 'protobufjs'
 
-export type Message = {
-    typeUrl: string,
-    value: protobuf.Reader|Uint8Array,
+export interface Message {
+  typeUrl: string
+  value: protobuf.Reader | Uint8Array
 }

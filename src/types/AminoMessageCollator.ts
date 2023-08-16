@@ -1,6 +1,6 @@
-import {AminoMsg} from "@cosmjs/amino";
+import { type AminoMsg } from '@cosmjs/amino'
 
-export type AminoMessageCollator = {
-    grantee: string,
-    messages: AminoMsg[]
+export interface AminoMessageCollator {
+  grantee: string
+  messages: AminoMsg[]
 }
