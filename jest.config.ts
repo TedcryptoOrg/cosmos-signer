@@ -4,6 +4,9 @@
  */
 
 export default {
+  // set runner to jest circus
+  testRunner: 'jest-circus/runner',
+
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
