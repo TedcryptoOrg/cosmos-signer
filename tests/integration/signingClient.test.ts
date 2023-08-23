@@ -3,6 +3,9 @@ import {Network, SigningClient} from "../../src";
 import {coin, GasPrice} from "@cosmjs/stargate";
 import {createSigner} from "../Helper/fixedValues";
 
+jest.retryTimes(3)
+jest.setTimeout(60000)
+
 describe('SigningClient', () => {
     it('should be able to create a signing client from a chain directory', async () => {
         const chain = (await new ChainDirectory().getChainData('osmosis')).chain;
