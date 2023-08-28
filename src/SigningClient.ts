@@ -97,8 +97,8 @@ export class SigningClient {
         }
     }
 
-    async signAndBroadcast(address: string, messages: Message[], gas: number, memo: string|undefined = undefined, gasPrice: GasPrice|string|undefined = undefined ) {
-        if (!gas)
+    async signAndBroadcast(address: string, messages: Message[], memo?: string, gasPrice?: GasPrice|string, gas?: number ) {
+        if (gas === undefined || gas === 0)
             gas = await this.simulate(address, messages, memo);
         const fee = this.getFee(gas, gasPrice);
         const txBody = await this.sign(address, messages, memo, fee)
@@ -176,7 +176,7 @@ export class SigningClient {
         };
     }
 
-    getFee(gas: number, gasPrice: GasPrice|string|undefined = undefined): Fee {
+    getFee(gas: number, gasPrice?: GasPrice|string|undefined): Fee {
         if (!gas)
             gas = 200000;
 
