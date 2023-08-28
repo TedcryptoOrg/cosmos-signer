@@ -54,4 +54,8 @@ describe('SigningClient', () => {
 
         expect(await signingClient.simulate('migaloo1r37anntu9wgk06jeycatp2npmytqugq54tkwju', [message])).toBeGreaterThan(100);
     });
+
+    it('should be able to sign using a fee granter', async () => {
+
+    });
 });
