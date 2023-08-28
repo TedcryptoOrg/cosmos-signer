@@ -77,9 +77,10 @@ export class SigningClient {
             })
     }
 
-    async simulate(address: string, messages: Message[], memo: string|undefined = undefined, modifier: number|undefined = undefined) {
+    async simulate(address: string, messages: Message[], memo?: string|undefined, modifier?: number|undefined, fee?: Fee|undefined) {
         const account = await this.getAccount(address)
-        const fee = this.getFee(100_000)
+        if (fee === undefined)
+            fee = this.getFee(100_000)
         const txBody = {
             bodyBytes: this.makeBodyBytes(messages, memo),
             authInfoBytes: await this.makeAuthInfoBytes(account, fee, SignMode.SIGN_MODE_UNSPECIFIED),
