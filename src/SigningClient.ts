@@ -82,10 +82,7 @@ export class SigningClient {
         const fee = this.getFee(100_000)
         const txBody = {
             bodyBytes: this.makeBodyBytes(messages, memo),
-            authInfoBytes: await this.makeAuthInfoBytes(account, {
-                amount: fee.amount,
-                gasLimit: fee.gas,
-            }, SignMode.SIGN_MODE_UNSPECIFIED),
+            authInfoBytes: await this.makeAuthInfoBytes(account, fee, SignMode.SIGN_MODE_UNSPECIFIED),
             signatures: [new Uint8Array()],
         }
 
@@ -100,7 +97,7 @@ export class SigningClient {
         }
     }
 
-    async signAndBroadcast(address: string, messages: Message[], gas: number, memo: string|undefined = undefined, gasPrice: GasPrice|string|undefined = undefined) {
+    async signAndBroadcast(address: string, messages: Message[], gas: number, memo: string|undefined = undefined, gasPrice: GasPrice|string|undefined = undefined ) {
         if (!gas)
             gas = await this.simulate(address, messages, memo);
         const fee = this.getFee(gas, gasPrice);
@@ -109,15 +106,12 @@ export class SigningClient {
         return this.broadcast(txBody)
     }
 
-    async sign(address: string, messages: Message[], memo: string|undefined = undefined, fee: any){
+    async sign(address: string, messages: Message[], memo: string|undefined = undefined, fee: Fee){
         const account = await this.getAccount(address)
         const { account_number: accountNumber } = account
         const txBodyBytes = this.makeBodyBytes(messages, memo)
         // Sign using standard protobuf messages
-        const authInfoBytes = await this.makeAuthInfoBytes(account, {
-            amount: fee.amount,
-            gasLimit: fee.gas,
-        }, SignMode.SIGN_MODE_DIRECT)
+        const authInfoBytes = await this.makeAuthInfoBytes(account, fee, SignMode.SIGN_MODE_DIRECT)
         const signDoc = makeSignDoc(txBodyBytes, authInfoBytes, this.network.chainId, accountNumber);
         const { signature, signed } = await this.signer.signDirect(address, signDoc);
         return {
@@ -182,10 +176,16 @@ export class SigningClient {
         };
     }
 
-    getFee(gas: number, gasPrice: GasPrice|string|undefined = undefined) {
+    getFee(gas: number, gasPrice: GasPrice|string|undefined = undefined): Fee {
         if (!gas)
             gas = 200000;
-        return this.calculateFee(gas, gasPrice || this.defaultGasPrice);
+
+        const fee = this.calculateFee(gas, gasPrice || this.defaultGasPrice);
+
+        return Fee.fromPartial({
+            amount: fee.amount,
+            gasLimit: fee.gas,
+        });
     }
 
     pubkeyTypeUrl(pub_key: undefined|{'@type': string}): string {
@@ -201,7 +201,7 @@ export class SigningClient {
         return '/cosmos.crypto.secp256k1.PubKey'
     }
 
-    async makeAuthInfoBytes(account: any, fee: any, mode: any){
+    async makeAuthInfoBytes(account: any, fee: Fee, mode: any){
         const { sequence } = account
         const accountFromSigner = (await this.signer.getAccounts())[0]
         if (!accountFromSigner) {
@@ -221,7 +221,7 @@ export class SigningClient {
                     modeInfo: { single: { mode: mode } },
                 },
             ],
-            fee: Fee.fromPartial(fee),
+            fee: fee,
         }).finish()
     }
 
