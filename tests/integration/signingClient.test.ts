@@ -14,8 +14,10 @@ describe('SigningClient', () => {
 
         const signingClient = new SigningClient(Network.createFromChain(chain).data, GasPrice.fromString('0uosmo'), signer);
         expect(signingClient).toBeInstanceOf(SigningClient);
-        expect(signingClient.calculateFee(1000000, GasPrice.fromString('0uosmo'))).toEqual({"amount": [{"amount": "0", "denom": "uosmo"}], "gas": "1000000"});
-        expect(signingClient.calculateFee(1000000, GasPrice.fromString('1uosmo'))).toEqual({"amount": [{"amount": "1000000", "denom": "uosmo"}], "gas": "1000000"});
+        expect(signingClient.calculateFee(1000000, GasPrice.fromString('0uosmo')))
+            .toEqual({"amount": [{"amount": "0", "denom": "uosmo"}], "gas": BigInt("1000000")});
+        expect(signingClient.calculateFee(1000000, GasPrice.fromString('1uosmo')))
+            .toEqual({"amount": [{"amount": "1000000", "denom": "uosmo"}], "gas": BigInt("1000000")});
     })
 
     it('should estimate fees for a given network (osmosis)', async () => {
