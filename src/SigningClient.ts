@@ -175,7 +175,7 @@ export class SigningClient {
         const amount = mathjs.ceil(mathjs.bignumber(mathjs.multiply(mathjs.bignumber(gasPriceAmount.toString()), mathjs.bignumber(gasLimit.toString()))));
         return {
             amount: [coin(amount, denom)],
-            gas: gasLimit.toString()
+            gas: BigInt(gasLimit)
         };
     }
 
