@@ -7,6 +7,7 @@ import { encodeSecp256k1Signature, type StdSignature } from '@cosmjs/amino'
 import { makeSignBytes } from '@cosmjs/proto-signing'
 import { type SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { type AccountData } from '@cosmjs/proto-signing/build/signer'
+import { type SignatureLike } from '@ethersproject/bytes'
 
 export class EthSigner {
   constructor (
@@ -18,7 +19,7 @@ export class EthSigner {
   async signDirect (_address: string, signDoc: SignDoc): Promise<{ signed: SignDoc, signature: StdSignature }> {
     const signature = await this.ethSigner
       ._signingKey()
-      .signDigest(keccak256(makeSignBytes(signDoc)))
+      .signDigest(keccak256(makeSignBytes(signDoc))) as SignatureLike
     const splitSignature = BytesUtils.splitSignature(signature)
     const result = BytesUtils.arrayify(
       BytesUtils.concat([splitSignature.r, splitSignature.s])
@@ -35,7 +36,7 @@ export class EthSigner {
   }
 
   async getAddress (): Promise<string> {
-    const ethereumAddress = await this.ethSigner.getAddress()
+    const ethereumAddress = await this.ethSigner.getAddress() as string
     const data = ETH.decoder(ethereumAddress)
     return Bech32.encode(this.prefix, Bech32.toWords(data))
   }
