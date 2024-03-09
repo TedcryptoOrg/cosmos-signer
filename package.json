@@ -1,6 +1,6 @@
 {
   "name": "@tedcryptoorg/cosmos-signer",
-  "version": "0.0.8",
+  "version": "1.1.0",
   "description": "Cosmos Signer - A library for signing transactions for Cosmos SDK chains",
   "scripts": {
     "test": "jest --passWithNoTests",
