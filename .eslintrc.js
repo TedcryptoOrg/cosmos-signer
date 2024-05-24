@@ -14,6 +14,7 @@ module.exports = {
         'babel.config.js',
         'node_modules/',
         'tests/',
-        'dist/'
+        'dist/',
+        'lib/'
     ],
 }
