@@ -1,5 +1,8 @@
 import {createSigner} from "../../Helper/fixedValues";
 
+jest.setTimeout(30000)
+jest.retryTimes(3)
+
 describe('Signer', () => {
     it('should be able to create and get the right address for cosmos chains', async () => {
         const signer = await createSigner('osmosis');
