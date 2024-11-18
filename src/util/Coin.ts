@@ -1,5 +1,5 @@
 import { type Coin, coin as _coin } from '@cosmjs/stargate'
-const mathjs = require('mathjs')
+import * as mathjs from 'mathjs'
 
 export function coin (amount: any, denom: string): Coin {
   return _coin(

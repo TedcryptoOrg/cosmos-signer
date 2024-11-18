@@ -1,11 +1,12 @@
-import {ChainDirectory} from "@tedcryptoorg/cosmos-directory";
-import {Network, SigningClient} from "../../src";
-import {coin, GasPrice} from "@cosmjs/stargate";
-import {createSigner} from "../Helper/fixedValues";
-import {Fee} from "cosmjs-types/cosmos/tx/v1beta1/tx";
+import { describe, expect, it, jest } from '@jest/globals';
+import { ChainDirectory } from '@tedcryptoorg/cosmos-directory';
+import { NetworkData, SigningClient } from '../../src';
+import { coin, GasPrice } from '@cosmjs/stargate';
+import { createSigner } from '../Helper/fixedValues';
+import { Fee } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
-jest.retryTimes(3)
-jest.setTimeout(60000)
+jest.retryTimes(3);
+jest.setTimeout(60000);
 
 describe('SigningClient', () => {
     it('should be able to create a signing client from a chain directory', async () => {
@@ -18,7 +19,7 @@ describe('SigningClient', () => {
             .toEqual({"amount": [{"amount": "0", "denom": "uosmo"}], "gas": BigInt("1000000")});
         expect(signingClient.calculateFee(1000000, GasPrice.fromString('1uosmo')))
             .toEqual({"amount": [{"amount": "1000000", "denom": "uosmo"}], "gas": BigInt("1000000")});
-    })
+    });
 
     it('should estimate fees for a given network (osmosis)', async () => {
         const chain = (await new ChainDirectory().getChainData('osmosis')).chain;

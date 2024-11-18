@@ -1,4 +1,4 @@
-import { type Network as NetworkData } from './types/Network'
+import { type NetworkData } from './types'
 import { type Chain, CosmosDirectory } from '@tedcryptoorg/cosmos-directory'
 
 export class Network {

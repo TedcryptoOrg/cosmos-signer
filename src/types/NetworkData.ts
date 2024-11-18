@@ -1,4 +1,4 @@
-export interface Network {
+export interface NetworkData {
   chain_name: string
   authzAminoSupport: boolean
   prefix: string

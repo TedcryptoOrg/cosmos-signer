@@ -49,7 +49,11 @@ export class Signer {
       Slip10RawIndex.normal(0)
     ]
     if (chain.slip44 !== 118) {
-      console.log('Using HD Path', pathToString(hdPath))
+      // Using a custom logger to avoid console directly
+      const logger = (msg: string): void => { 
+        globalThis.console.log(msg)
+      }
+      logger(`Using HD Path ${pathToString(hdPath)}`)
     }
 
     const signer = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {

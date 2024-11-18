@@ -48,7 +48,7 @@ const messages: Message[] = [{
     },
 }];
 
-const network = Network.createFromChain('juno-1')
+const network = NetworkData.createFromChain('juno-1')
 const signer = new SigningClient(network, GasPrice.fromString('0.025ujuno'), window.keplr);
 const result = signer.signAndBroadcast(address, messages, 0); // 0 fee, let it simulate before broadcast (or use .simulate fn)
 

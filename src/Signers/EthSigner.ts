@@ -1,6 +1,5 @@
 import { ETH } from '@evmos/address-converter'
 import Bech32 from 'bech32'
-
 import * as BytesUtils from '@ethersproject/bytes'
 import { keccak256 } from '@ethersproject/keccak256'
 import { encodeSecp256k1Signature, type StdSignature } from '@cosmjs/amino'
@@ -41,7 +40,7 @@ export class EthSigner {
     return Bech32.encode(this.prefix, Bech32.toWords(data))
   }
 
-  async getAccounts (): Promise<readonly AccountData[]> {
+  getAccounts (): Promise<readonly AccountData[]> {
     return this.signer.getAccounts()
   }
 }

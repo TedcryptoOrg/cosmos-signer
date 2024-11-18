@@ -1,4 +1,4 @@
-import { type Network } from './types/Network'
+import { type NetworkData } from './types/NetworkData'
 import axios from 'axios'
 import { assertIsDeliverTxSuccess, type Coin, GasPrice } from '@cosmjs/stargate'
 import { coin } from './util/Coin'
@@ -13,20 +13,20 @@ import { sleep } from './util/Sleep'
 import { type Signer } from './Signers/Signer'
 import { type DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient'
 import { isEmpty } from './util/TypeUtils'
-
-const mathjs = require('mathjs')
-const Long = require('long')
+import { registry } from './Registry'
+import * as mathjs from 'mathjs'
+import Long from 'long'
 
 export class SigningClient {
   private readonly registry: Registry
 
   constructor (
-    private readonly network: Network,
+    private readonly network: NetworkData,
     private readonly defaultGasPrice: GasPrice,
     private readonly signer: Signer,
     private readonly defaultGasModifier: number = 1.5
   ) {
-    this.registry = require('./Registry').registry.getProtoSigningRegistry()
+    this.registry = registry.getProtoSigningRegistry()
   }
 
   async getAccount (address: string): Promise<any> {
@@ -93,7 +93,12 @@ export class SigningClient {
         tx_bytes: toBase64(TxRaw.encode(txBody).finish())
       }).then(el => el.data.gas_info.gas_used)
 
-      return parseInt((estimate * (modifier ?? this.defaultGasModifier)).toString())
+      const gasEstimate = Number(estimate)
+      if (Number.isNaN(gasEstimate)) {
+        throw new Error('Invalid gas estimate received')
+      }
+
+      return Math.floor(gasEstimate * (modifier ?? this.defaultGasModifier))
     } catch (error: any) {
       if (error.response !== undefined && error.response.data !== undefined) {
         throw new Error(error.response.data.error as string)
@@ -133,14 +138,14 @@ export class SigningClient {
     const timeoutMs = this.network.txTimeout !== 0 ? this.network.txTimeout : 60_000
     const pollIntervalMs = 3_000
     let timedOut = false
-    const txPollTimeout = setTimeout(() => {
+    const txPollTimeout = globalThis.setTimeout(() => {
       timedOut = true
     }, timeoutMs)
 
     const pollForTx = async (txId: any): Promise<any> => {
       if (timedOut) {
         throw new Error(
-                    `Transaction with ID ${txId} was submitted but was not yet found on the chain. You might want to check later. There was a wait of ${timeoutMs / 1000} seconds.`
+          `Transaction with ID ${txId} was submitted but was not yet found on the chain. You might want to check later. There was a wait of ${timeoutMs / 1000} seconds.`
         )
       }
       await sleep(pollIntervalMs)
@@ -161,19 +166,17 @@ export class SigningClient {
 
     return await pollForTx(result.transactionHash).then(
       (value: DeliverTxResponse) => {
-        clearTimeout(txPollTimeout)
+        globalThis.clearTimeout(txPollTimeout)
         assertIsDeliverTxSuccess(value)
         return value
       },
       (error: any) => {
-        clearTimeout(txPollTimeout)
+        globalThis.clearTimeout(txPollTimeout)
         return error
       }
     )
   }
 
-  // vendored to handle large integers
-  // https://github.com/cosmos/cosmjs/blob/0f0c9d8a754cbf01e17acf51d3f2dbdeaae60757/packages/stargate/src/fee.ts
   calculateFee (gasLimit: number, gasPrice: GasPrice | string): { amount: Coin[], gas: bigint } {
     const processedGasPrice = typeof gasPrice === 'string' ? GasPrice.fromString(gasPrice) : gasPrice
     const { denom, amount: gasPriceAmount } = processedGasPrice
@@ -228,7 +231,7 @@ export class SigningClient {
               key: signerPubkey
             }).finish()
           },
-          sequence: Long.fromNumber(sequence, true),
+          sequence: Long.fromNumber(sequence as number, true),
           modeInfo: { single: { mode } }
         }
       ],
