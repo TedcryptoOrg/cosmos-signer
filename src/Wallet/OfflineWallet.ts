@@ -9,6 +9,7 @@ export default class OfflineWallet extends BaseWallet {
     public keychangeEvent = 'offline_keystorechange'
 
     constructor(private readonly mnemonic: string, protected readonly logger?: any) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- This is a hack to avoid passing an empty object
         super({} as Provider, logger);
     }
 
