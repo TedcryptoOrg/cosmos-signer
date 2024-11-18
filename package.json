@@ -24,7 +24,12 @@
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["cosmos", "blockchain", "signing", "cryptocurrency"],
+  "keywords": [
+    "cosmos",
+    "blockchain",
+    "signing",
+    "cryptocurrency"
+  ],
   "author": "Josh_Lopes<josluis.lopes@gmail.com>",
   "license": "MIT",
   "repository": "https://github.com/TedcryptoOrg/cosmos-signer",
@@ -33,6 +38,7 @@
     "@ethersproject/wallet": "^5.7.0",
     "@evmos/address-converter": "^0.1.9",
     "@tedcryptoorg/cosmos-directory": "^0.1.1",
+    "@walletconnect/browser-utils": "^1.8.0",
     "axios": "^1.2.5",
     "axios-retry": "^4.0.0",
     "compare-versions": "^6.0.0-rc.1",
@@ -54,11 +60,7 @@
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "babel-jest": "^29.3.1",
-<<<<<<< Updated upstream
     "eslint-config-love": "^84.0.0",
-=======
-    "eslint": "^8.49.0",
->>>>>>> Stashed changes
     "jest": "^29.3.1",
     "jest-circus": "^29.6.3",
     "rimraf": "^5.0.1",

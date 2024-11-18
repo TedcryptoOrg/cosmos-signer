@@ -1,2 +1,2 @@
 export * from './EthSigner'
-export * from './Signer'
+export * from './DefaultSigner'

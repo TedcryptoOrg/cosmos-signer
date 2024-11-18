@@ -1,3 +1,4 @@
+export * from './Account'
 export * from './AminoMessageCollator'
 export * from './Message'
 export * from './MessageCollator'
