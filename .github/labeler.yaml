@@ -1,0 +1,14 @@
+# General
+
+"Documentation":
+  - "**/docs/**"
+  - "**/README.md"
+
+"Workflows":
+  - ".github/workflows/**"
+
+"App":
+  - "src/**"
+
+"Tests":
+  - "tests/**"

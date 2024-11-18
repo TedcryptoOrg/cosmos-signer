@@ -1,23 +1,26 @@
-import type { NetworkData, Message } from './types'
+import type { NetworkData, Message } from '../types'
 import axios from 'axios'
 import { assertIsDeliverTxSuccess, type Coin, GasPrice } from '@cosmjs/stargate'
 import { toBase64 } from '@cosmjs/encoding'
 import { Fee, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-import { parseTxResult, sleep, isEmpty, coin } from './util'
-import type { DefaultSigner } from './Signers'
+import { parseTxResult, sleep, isEmpty, coin } from '../util'
 import type { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient'
 import * as mathjs from 'mathjs'
 import _ from "lodash";
-import type {Wallet} from "./Wallet";
+import type {Wallet} from "../Wallet";
+import {DefaultAdapter} from "./Adapter";
 
 export class SigningClient {
+  private readonly adapter: DefaultAdapter;
+
   constructor (
     private readonly network: NetworkData,
+    public readonly wallet: Wallet,
     private readonly defaultGasPrice: GasPrice,
-    private readonly signer: DefaultSigner,
-    private readonly wallet: Wallet,
-    private readonly defaultGasModifier = 1.5
+    private readonly defaultGasModifier = 1.5,
+    readonly selectedAdapter?: DefaultAdapter
   ) {
+    this.adapter = selectedAdapter ?? new DefaultAdapter(network, wallet)
   }
 
   async getAccount (address: string): Promise<any> {
@@ -126,13 +129,13 @@ export class SigningClient {
   async sign(address: string, messages: Message[], fee: Fee, memo?: string) {
     const account = await this.getAccount(address)
 
-    return await this.signer.sign(account, messages, fee, memo)
+    return await this.adapter.sign(account, messages, fee, memo)
   }
 
   async simulate(address: string, messages: Message[], memo?: string, modifier?: number) {
     const account = await this.getAccount(address)
     const fee = this.getFee(100_000)
-    const txBody = await this.signer.simulate(account, messages, fee, memo)
+    const txBody = await this.adapter.simulate(account, messages, fee, memo)
     try {
       const estimate = await axios.post(this.network.restUrl + '/cosmos/tx/v1beta1/simulate', {
         tx_bytes: toBase64(TxRaw.encode(txBody).finish()),

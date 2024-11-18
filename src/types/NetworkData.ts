@@ -2,6 +2,7 @@ export interface NetworkData {
   chain_name: string
   path: string
   name: string
+  bech32_prefix: string
   prettyName: string
   authzAminoSupport: boolean
   authzAminoGenericOnly: boolean

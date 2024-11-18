@@ -58,8 +58,7 @@ export interface Provider {
 }
 
 export interface ProviderKey {
-    // Name of the selected key store.
-    name: string
+    name: string // Name of the selected key store.
     algo: string
     pubKey: Uint8Array
     address: Uint8Array
@@ -76,7 +75,7 @@ export default class BaseWallet implements Wallet {
 
     constructor(
         protected provider: Provider,
-        private readonly logger?: Logger
+        protected readonly logger?: Logger
     ) {
     }
 
@@ -181,15 +180,15 @@ export default class BaseWallet implements Wallet {
     }
 
     async getAccounts(): Promise<any> {
-        return await this.signer?.getAccounts()
+        return await this.signer?.getAccounts();
     }
 
     async signDirect(...args: any[]): Promise<any> {
-        return await this.signer?.signDirect(...args)
+        return await this.signer?.signDirect(...args);
     }
 
     async signAmino(...args: any[]): Promise<any> {
-        return await this.signer?.signAmino(...args)
+        return await this.signer?.signAmino(...args);
     }
 
     async suggestChain(network: NetworkData): Promise<void> {

@@ -1,5 +1,5 @@
 import { AuthInfo, type Fee, TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx.js";
-import type {Message,type Account} from "../types";
+import type {Message, Account, NetworkData} from "../../types";
 import {SignMode} from "cosmjs-types/cosmos/tx/signing/v1beta1/signing";
 import {
     createAuthzAminoConverters,
@@ -10,24 +10,23 @@ import {
     createStakingAminoConverters,
     AminoTypes,
 } from "@cosmjs/stargate";
-import type {Network} from "../Network";
-import {createAuthzExecAminoConverters} from "../Converters/Authz";
+import {createAuthzExecAminoConverters} from "../../Converters";
 import {PubKey} from "cosmjs-types/cosmos/crypto/secp256k1/keys";
 import { defaultRegistryTypes as defaultStargateTypes } from '@cosmjs/stargate/build/signingstargateclient'
-import type {Wallet} from "../Wallet";
 import { fromBase64 } from '@cosmjs/encoding'
 import {type AminoMsg, makeSignDoc as makeAminoSignDoc} from "@cosmjs/amino";
 import { makeSignDoc, Registry } from "@cosmjs/proto-signing";
 import _ from "lodash";
 import Long from "long";
+import type {Wallet} from "../../Wallet";
 
-export class DefaultSigner {
+export class DefaultAdapter {
     private readonly registry: Registry
 
     private readonly aminoTypes: AminoTypes
 
     constructor(
-        private readonly network: Network,
+        private readonly network: NetworkData,
         private readonly wallet: Wallet,
     ) {
         this.registry = new Registry(defaultStargateTypes);
@@ -44,7 +43,7 @@ export class DefaultSigner {
     }
 
     async sign(account: Account, messages: Message[], fee: Fee, memo?: string): Promise<any> {
-        const { chainId } = this.network.data
+        const { chainId } = this.network
         const { account_number: accountNumber, sequence, address } = account
         const txBodyBytes = this.makeBodyBytes(messages, memo)
         let aminoMsgs = undefined
@@ -87,25 +86,25 @@ export class DefaultSigner {
     convertToAmino(messages: Message[]): AminoMsg[] {
         return messages.map((message: Message) => {
             if(message.typeUrl.startsWith('/cosmos.authz')){
-                if(!this.network.data.authzAminoSupport){
+                if(!this.network.authzAminoSupport){
                     throw new Error('This chain does not support amino conversion for Authz messages')
                 }
-                if(this.network.data.authzAminoGenericOnly && this.wallet.signDirectSupport()){
+                if(this.network.authzAminoGenericOnly && this.wallet.signDirectSupport()){
                     throw new Error('This chain does not fully support amino conversion for Authz messages, using signDirect instead')
                 }
             }
             if(message.typeUrl === '/cosmos.authz.v1beta1.MsgExec'){
                 // @ts-ignore
                 const execTypes = message.value.msgs.map((msg: Message) => msg.typeUrl)
-                const preventedTypes = execTypes.filter((type: string) => this.network.data.authzAminoExecPreventTypes.some((prevent: any) => type.match(_.escapeRegExp(prevent))))
+                const preventedTypes = execTypes.filter((type: string) => this.network.authzAminoExecPreventTypes.some((prevent: any) => type.match(_.escapeRegExp(prevent))))
                 if(preventedTypes.length > 0){
                     throw new Error(`This chain does not support amino conversion for Authz Exec with message types: ${preventedTypes.join(', ')}`)
                 }
-            }else if(this.network.data.aminoPreventTypes.some(prevent => message.typeUrl.match(_.escapeRegExp(prevent)))){
+            }else if(this.network.aminoPreventTypes.some(prevent => message.typeUrl.match(_.escapeRegExp(prevent)))){
                 throw new Error(`This chain does not support amino conversion for message type: ${message.typeUrl}`)
             }
             let aminoMessage = this.aminoTypes.toAmino(message)
-            if(this.network.data.authzAminoLiftedValues){
+            if(this.network.authzAminoLiftedValues){
                 switch (aminoMessage.type) {
                     case 'cosmos-sdk/MsgGrant':
                         aminoMessage = aminoMessage.value
@@ -161,11 +160,11 @@ export class DefaultSigner {
     pubkeyTypeUrl(pub_key: any) {
         if (pub_key?.['@type']) return pub_key['@type']
 
-        if (this.network.data.path === 'injective') {
+        if (this.network.path === 'injective') {
             return '/injective.crypto.v1beta1.ethsecp256k1.PubKey'
         }
 
-        if (this.network.data.slip44 === 60) {
+        if (this.network.slip44 === 60) {
             return '/ethermint.crypto.v1.ethsecp256k1.PubKey'
         }
         return '/cosmos.crypto.secp256k1.PubKey'

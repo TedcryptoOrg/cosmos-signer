@@ -1,17 +1,21 @@
 import type { NetworkData } from './types'
-import { type Chain, CosmosDirectory } from '@tedcryptoorg/cosmos-directory'
+import {type Chain, ChainDirectory, CosmosDirectory} from '@tedcryptoorg/cosmos-directory'
 import {bignumber, format, larger, multiply, number, pow} from "mathjs";
 import {GasPrice} from "@cosmjs/stargate";
 
 export class Network {
   constructor (public readonly data: NetworkData) {}
 
-  public static createFromChain (
-      chain: Chain,
+  public static async createFromChain (
+      chain: Chain|string,
       txTimeout = 1000,
       restUrl: string | undefined = undefined,
       rpcUrl: string | undefined = undefined
-  ): Network {
+  ): Promise<Network> {
+    if(typeof chain === 'string'){
+      chain = (await (new ChainDirectory().getChainData(chain))).chain
+    }
+
     return new Network({
       ...chain,
       chain_name: chain.name,

@@ -32,7 +32,7 @@ export default class CosmostationWallet extends BaseWallet {
         })
     }
 
-    private suggestChainData(network: NetworkData): any {
+    suggestChainData(network: NetworkData): any {
         return {
             chainId: network.chainId,
             chainName: network.prettyName,

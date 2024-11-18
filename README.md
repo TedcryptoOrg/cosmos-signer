@@ -1,4 +1,4 @@
-# Cosmos DefaultSigner
+# Cosmos DefaultAdapter
 
 This is a simple implementation of a signer in cosmos. With it, you will be able to simulate, 
 sign and broadcast transactions easily without having to worry about the network details.
@@ -33,7 +33,7 @@ async function getKeplrAddress(): Promise<string> {
  * Get address from mnemonic
  */
 async function getWalletAddressFromMnemonic(mnemonic: string): Promise<string> {
-    const signer = await DefaultSigner.createSigner(chain, mnemonic)
+    const signer = await DefaultAdapter.createSigner(chain, mnemonic)
     return await signer.getAddress()
 }
 
