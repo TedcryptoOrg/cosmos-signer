@@ -1,0 +1,48 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
+  "baseBranches": ["main"],
+  "automerge": true,
+  "automergeType": "pr",
+  "requiredStatusChecks": ["tests"],
+  "rangeStrategy": "bump",
+  "schedule": ["before 5am on friday"],
+  "packageRules": [
+    {
+      "description": "API updates",
+      "paths": ["api/**"],
+      "groupName": "API dependencies",
+      "automerge": true,
+      "enabled": true,
+      "updateTypes": ["minor", "patch"]
+    },
+    {
+      "description": "Frontend updates",
+      "paths": ["frontend/**"],
+      "groupName": "Frontend dependencies",
+      "automerge": true,
+      "enabled": true,
+      "updateTypes": ["minor", "patch"]
+    },
+    {
+      "description": "DevDependencies for both API and Frontend",
+      "depTypeList": ["devDependencies"],
+      "groupName": "DevDependencies",
+      "automerge": true,
+      "schedule": ["before 5am on friday"],
+      "updateTypes": ["minor", "patch"]
+    },
+    {
+      "description": "Major updates for both frontend and backend",
+      "groupName": "All Major Updates",
+      "enabled": true,
+      "automerge": false,
+      "updateTypes": ["major"]
+    }
+  ],
+  "ignoreDeps": ["webpack"],
+  "labels": ["dependencies", "renovate"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "dependencyDashboard": true
+}

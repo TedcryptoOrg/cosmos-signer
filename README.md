@@ -1,4 +1,4 @@
-# Cosmos Signer
+# Cosmos DefaultAdapter
 
 This is a simple implementation of a signer in cosmos. With it, you will be able to simulate, 
 sign and broadcast transactions easily without having to worry about the network details.
@@ -33,11 +33,12 @@ async function getKeplrAddress(): Promise<string> {
  * Get address from mnemonic
  */
 async function getWalletAddressFromMnemonic(mnemonic: string): Promise<string> {
-    const signer = await Signer.createSigner(chain, mnemonic)
+    const signer = await DefaultAdapter.createSigner(chain, mnemonic)
     return await signer.getAddress()
 }
 
-const address = ... // Get address from keplr or mnemonic using functions above
+const address =
+... // Get address from keplr or mnemonic using functions above
 
 const messages: Message[] = [{
     typeUrl: "/cosmos.staking.v1beta1.MsgDelegate",
@@ -48,7 +49,7 @@ const messages: Message[] = [{
     },
 }];
 
-const network = Network.createFromChain('juno-1')
+const network = NetworkData.createFromChain('juno-1')
 const signer = new SigningClient(network, GasPrice.fromString('0.025ujuno'), window.keplr);
 const result = signer.signAndBroadcast(address, messages, 0); // 0 fee, let it simulate before broadcast (or use .simulate fn)
 

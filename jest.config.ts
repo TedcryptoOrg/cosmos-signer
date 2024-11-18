@@ -1,9 +1,26 @@
-/*
- * For a detailed explanation regarding each configuration property and type check, visit:
- * https://jestjs.io/docs/configuration
- */
+import type { Config } from '@jest/types';
 
-export default {
+const config: Config.InitialOptions = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
   testRunner: 'jest-circus/runner',
   clearMocks: true,
-};
+  moduleFileExtensions: ['ts', 'js'],
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', {
+      useESM: true,
+    }],
+  },
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
+  extensionsToTreatAsEsm: ['.ts'],
+  testMatch: ['**/tests/**/*.test.ts'],
+  globals: {
+    'ts-jest': {
+      useESM: true,
+    },
+  },
+}
+
+export default config;
