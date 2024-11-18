@@ -4,7 +4,7 @@ import { Network } from '../../src/Network'
 
 describe('Network', () => {
     it('we can create from a chain', async () => {
-        const chain = (await new ChainDirectory().getChainData('osmosis')).chain
+        const {chain} = await new ChainDirectory().getChainData('osmosis')
         expect(chain).not.toBeNull()
 
         const network = Network.createFromChain(chain)

@@ -1,4 +1,4 @@
-export type Account = {
+export interface Account {
     address: string,
     account_number: number,
     sequence: number,

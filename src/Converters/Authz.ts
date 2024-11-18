@@ -1,8 +1,8 @@
 import moment from 'moment'
 import {GenericAuthorization} from "cosmjs-types/cosmos/authz/v1beta1/authz.js";
 import {StakeAuthorization} from "cosmjs-types/cosmos/staking/v1beta1/authz.js";
-import {Registry} from "@cosmjs/proto-signing";
-import {AminoTypes} from "@cosmjs/stargate";
+import type {Registry} from "@cosmjs/proto-signing";
+import type {AminoTypes} from "@cosmjs/stargate";
 
 function createAuthzAuthorizationAminoConverter() {
     return {
@@ -123,7 +123,7 @@ export function createAuthzExecAminoConverters(registry: Registry, aminoTypes: A
                 grantee,
                 msgs: msgs.map(({type, value}: any) => {
                     const proto = aminoTypes.fromAmino({type, value})
-                    const typeUrl = proto.typeUrl
+                    const {typeUrl} = proto
                     const msgType = registry.lookupType(typeUrl) as any
                     if (msgType === undefined) {
                         throw new Error(`No message type registered for ${typeUrl}`)

@@ -1,4 +1,4 @@
-import { type DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient'
+import type { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient'
 
 export function parseTxResult (result: any): DeliverTxResponse {
   return {

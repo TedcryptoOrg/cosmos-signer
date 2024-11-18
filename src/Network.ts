@@ -1,4 +1,4 @@
-import { type NetworkData } from './types'
+import type { NetworkData } from './types'
 import { type Chain, CosmosDirectory } from '@tedcryptoorg/cosmos-directory'
 import {bignumber, format, larger, multiply, number, pow} from "mathjs";
 import {GasPrice} from "@cosmjs/stargate";
@@ -8,7 +8,7 @@ export class Network {
 
   public static createFromChain (
       chain: Chain,
-      txTimeout: number = 1000,
+      txTimeout = 1000,
       restUrl: string | undefined = undefined,
       rpcUrl: string | undefined = undefined
   ): Network {
@@ -17,7 +17,7 @@ export class Network {
       chain_name: chain.name,
       prettyName: chain.name,
       name: chain.name,
-      authzAminoSupport: chain.params.authz ?? false,
+      authzAminoSupport: chain.params.authz,
       prefix: chain.bech32_prefix,
       txTimeout,
       coinType: chain.slip44,
@@ -36,9 +36,9 @@ export class Network {
   }
 
   private static getGasPriceStep(chain: Chain, gasPrice?: string): {high: number, average: number, low: number} {
-    const feeConfig = chain.fees?.fee_tokens?.find(el => el.denom === chain.denom)
+    const feeConfig = chain.fees.fee_tokens?.find(el => el.denom === chain.denom)
 
-    let gasPriceNumber: number
+    let gasPriceNumber = 0
     if(gasPrice){
       gasPriceNumber = number(GasPrice.fromString(gasPrice).amount.toString())
 
@@ -52,7 +52,7 @@ export class Network {
     const minimumGasPrice = feeConfig?.low_gas_price ?? feeConfig?.fixed_min_gas_price
     // @ts-ignore
     let defaultGasPrice = number(format(bignumber(multiply(0.000000025, pow(10, chain.decimals || 6))), { precision: 14 }))
-    if(minimumGasPrice != undefined && larger(minimumGasPrice, defaultGasPrice)){
+    if(minimumGasPrice !== undefined && larger(minimumGasPrice, defaultGasPrice)){
       defaultGasPrice = minimumGasPrice
     }
     gasPriceNumber = feeConfig?.average_gas_price ?? defaultGasPrice

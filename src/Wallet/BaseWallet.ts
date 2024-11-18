@@ -1,34 +1,52 @@
-import {NetworkData} from "../types";
+import type {NetworkData} from "../types";
+import type {Logger} from "../Logger";
 
 export interface Wallet {
-    available(): boolean
-    connected(): boolean
-    isLedger(): boolean
-    signDirectSupport(): boolean
-    signAminoSupport(): boolean
-    connect(network: NetworkData): Promise<ProviderKey|null>
-    disconnect(): void
-    enable(network: NetworkData): Promise<void>
-    getKey(network: NetworkData): Promise<ProviderKey|null>
-    getSigner(network: NetworkData): Promise<WalletClient|null>
-    getAddress(): Promise<string>
-    getAccounts(): Promise<any>
-    signDirect(...args: any[]): Promise<any>
-    signAmino(...args: any[]): Promise<any>
-    suggestChain(network: NetworkData): Promise<void>
-    suggestChainData(network: NetworkData): any
-    getOptions(): any
-    setOptions(options: any): any
+    available: () => boolean
+
+    connected: () => boolean
+
+    isLedger: () => boolean
+
+    signDirectSupport: () => boolean
+
+    signAminoSupport: () => boolean
+
+    connect: (network: NetworkData) => Promise<ProviderKey | null>
+
+    disconnect: () => void
+
+    enable: (network: NetworkData) => Promise<void>
+
+    getKey: (network: NetworkData) => Promise<ProviderKey | null>
+
+    getSigner: (network: NetworkData) => Promise<WalletClient | null>
+
+    getAddress: () => Promise<string>
+
+    getAccounts: () => Promise<any>
+
+    signDirect: (...args: any[]) => Promise<any>
+
+    signAmino: (...args: any[]) => Promise<any>
+
+    suggestChain: (network: NetworkData) => Promise<void>
+
+    suggestChainData: (network: NetworkData) => any
+
+    getOptions: () => any
+
+    setOptions: (options: any) => any
 }
 
-export type WalletClient = {
+export interface WalletClient {
     signDirect: (...args: any[]) => Promise<any>
     signAmino: (...args: any[]) => Promise<any>
     getAddress: () => Promise<string>
     getAccounts: () => Promise<any>
 }
 
-export type Provider = {
+export interface Provider {
     enable: (chainId: string) => Promise<void>
     request: (data: any) => Promise<any>
     getKey: (chainId: string) => Promise<ProviderKey>
@@ -36,9 +54,10 @@ export type Provider = {
     getOfflineSignerAuto: (chainId: string) => Promise<any>
     getOfflineSigner: (chainId: string) => Promise<any>
     experimentalSuggestChain: (data: any) => Promise<void>
+    defaultOptions: any
 }
 
-export type ProviderKey = {
+export interface ProviderKey {
     // Name of the selected key store.
     name: string
     algo: string
@@ -49,33 +68,35 @@ export type ProviderKey = {
     isHardware?: boolean
 }
 
-export default class BaseWallet implements Wallet{
-    protected key: ProviderKey|null = null
-    protected signer: WalletClient|null = null
+export default class BaseWallet implements Wallet {
+    protected key: ProviderKey | null = null
+    protected signer: WalletClient | null = null
     protected suggestChainSupport = true
     protected options: any = {}
 
     constructor(
-        protected provider: Provider
-    ) {}
+        protected provider: Provider,
+        private readonly logger?: Logger
+    ) {
+    }
 
-    available() {
+    available(): boolean {
         return !!this.provider
     }
 
-    connected() {
+    connected(): boolean {
         return this.available()
     }
 
-    isLedger() {
+    isLedger(): boolean {
         return this.key?.isNanoLedger ?? this.key?.isHardware ?? false;
     }
 
-    signDirectSupport(){
+    signDirectSupport(): boolean {
         return !!this.signer?.signDirect
     }
 
-    signAminoSupport(){
+    signAminoSupport(): boolean {
         return !!this.signer?.signAmino
     }
 
@@ -83,11 +104,11 @@ export default class BaseWallet implements Wallet{
         return this.options;
     }
 
-    setOptions(options: any): any {
-        return this.options = options;
+    setOptions(options: any): void {
+        this.options = options;
     }
 
-    async connect(network: NetworkData) {
+    async connect(network: NetworkData): Promise<ProviderKey | null> {
         this.key = null
         this.signer = null
         try {
@@ -97,9 +118,9 @@ export default class BaseWallet implements Wallet{
 
             return this.key
         } catch (e) {
-            console.log(e)
+            this.logger?.log(e)
             if (!this.suggestChainSupport) {
-                console.log('Suggest chain not supported', network, e)
+                this.logger?.log('Suggest chain not supported', network, e)
                 throw new Error('Failed to connect wallet and suggest chain is not supported.')
             }
             try {
@@ -109,66 +130,71 @@ export default class BaseWallet implements Wallet{
 
                 return this.key
             } catch (s) {
-                console.log('Failed to suggest the chain and connect', e, s)
+                this.logger?.log('Failed to suggest the chain and connect', e, s)
                 throw new Error('Failed to connect wallet and suggest chain')
             }
         }
     }
 
-    disconnect() {
+    disconnect(): void {
+        this.key = null
+        this.signer = null
+
+        this.logger?.log('Disconnecting wallet')
     }
 
-    enable(network: NetworkData) {
-        const { chainId } = network
-        return this.provider.enable(chainId)
+    async enable(network: NetworkData): Promise<void> {
+        const {chainId} = network
+
+        await this.provider.enable(chainId);
     }
 
-    async getKey(network: NetworkData): Promise<ProviderKey|null> {
-        if(!this.key){
-            const { chainId } = network
+    async getKey(network: NetworkData): Promise<ProviderKey | null> {
+        if (this.key === null) {
+            const {chainId} = network
             this.key = await this.provider.getKey(chainId)
         }
 
         return this.key
     }
 
-    async getSigner(network: NetworkData) {
-        if(!this.signer){
-            const { chainId } = network
+    async getSigner(network: NetworkData): Promise<WalletClient | null> {
+        if (!this.signer) {
+            const {chainId} = network
             this.signer = await this.provider.getOfflineSignerAuto(chainId)
         }
 
         return this.signer
     }
 
-    async getAddress(){
-        if(this.signer?.getAddress){
-            return this.signer.getAddress()
-        }else{
+    async getAddress(): Promise<string> {
+        if (this.signer?.getAddress) {
+            return await this.signer.getAddress()
+        } else {
             const accounts = await this.getAccounts();
             if (accounts === undefined || accounts.length === 0) {
                 throw new Error('No accounts found in wallet')
             }
 
-            return accounts[0].address;
+            return accounts[0].address as string;
         }
     }
 
     async getAccounts(): Promise<any> {
-        return this.signer?.getAccounts()
+        return await this.signer?.getAccounts()
     }
 
-    async signDirect(...args: any[]){
-        return this.signer?.signDirect(...args)
+    async signDirect(...args: any[]): Promise<any> {
+        return await this.signer?.signDirect(...args)
     }
 
-    async signAmino(...args: any[]){
-        return this.signer?.signAmino(...args)
+    async signAmino(...args: any[]): Promise<any> {
+        return await this.signer?.signAmino(...args)
     }
 
-    suggestChain(network: NetworkData) {
+    async suggestChain(network: NetworkData): Promise<void> {
         if (this.suggestChainSupport) {
-            return this.provider.experimentalSuggestChain(this.suggestChainData(network))
+            await this.provider.experimentalSuggestChain(this.suggestChainData(network)); 
         } else {
             throw new Error(`${network.prettyName} (${network.chainId}) is not supported`)
         }
@@ -185,7 +211,7 @@ export default class BaseWallet implements Wallet{
             coinMinimalDenom: network.denom,
             coinDecimals: network.decimals
         }
-        if(network.coinGeckoId){
+        if (network.coinGeckoId) {
             currency.coinGeckoId = network.coinGeckoId
         }
 
@@ -195,7 +221,7 @@ export default class BaseWallet implements Wallet{
             chainId: network.chainId,
             chainName: network.prettyName,
             stakeCurrency: currency,
-            bip44: { coinType: network.slip44 },
+            bip44: {coinType: network.slip44},
             walletUrlForStaking: "https://restake.app/" + network.name,
             bech32Config: {
                 bech32PrefixAccAddr: network.prefix,
@@ -206,11 +232,11 @@ export default class BaseWallet implements Wallet{
                 bech32PrefixConsPub: network.prefix + "valconspub"
             },
             currencies: [currency],
-            feeCurrencies: [{...currency, gasPriceStep: network.gasPriceStep }],
-            ...(network.data.keplrFeatures
-                    ? { features: network.data.keplrFeatures }
+            feeCurrencies: [{...currency, gasPriceStep: network.gasPriceStep}],
+            ...(network.data.keplrFeatures !== undefined
+                    ? {features: network.data.keplrFeatures}
                     : (network.slip44 === 60
-                        ? { features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"] }
+                        ? {features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"]}
                         : {})
             )
         }

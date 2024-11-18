@@ -1,6 +1,5 @@
-import BaseWallet, {Provider} from "./BaseWallet";
-import {NetworkData} from "../types";
-import {DefaultSigner} from "../Signers";
+import BaseWallet, {type Provider, type WalletClient} from "./BaseWallet";
+import type {NetworkData} from "../types";
 
 export default class CosmostationWallet extends BaseWallet {
     public name = 'cosmostation'
@@ -9,12 +8,12 @@ export default class CosmostationWallet extends BaseWallet {
 
     protected authzAminoLiftedValueSupport = false
 
-    constructor(keplrProvider: Provider, private cosmostationProvider: Provider) {
+    constructor(keplrProvider: Provider, private readonly cosmostationProvider: Provider) {
         super(keplrProvider)
     }
 
-    async getSigner(network: NetworkData): Promise<DefaultSigner|null> {
-        if(!this.signer){
+    async getSigner(network: NetworkData): Promise<WalletClient|null> {
+        if(this.signer === null){
             const { chainId } = network
             if(this.isLedger()){
                 this.signer = await this.provider.getOfflineSignerOnlyAmino(chainId)
@@ -22,17 +21,18 @@ export default class CosmostationWallet extends BaseWallet {
                 this.signer = await this.provider.getOfflineSigner(chainId)
             }
         }
+
         return this.signer
     }
 
-    suggestChain(network: NetworkData) {
-        return this.cosmostationProvider.request({
+    async suggestChain(network: NetworkData): Promise<any> {
+        return await this.cosmostationProvider.request({
             method: 'cos_addChain',
             params: this.suggestChainData(network)
         })
     }
 
-    suggestChainData(network: NetworkData): any {
+    private suggestChainData(network: NetworkData): any {
         return {
             chainId: network.chainId,
             chainName: network.prettyName,
@@ -49,7 +49,7 @@ export default class CosmostationWallet extends BaseWallet {
                 tiny: `${network.gasPriceStep.low}`
             },
             // sendGas: "80000", // optional (default: '100000')
-            ...((network.data.keplrFeatures?.includes('eth-address-gen') || network.slip44 === 60)
+            ...((network.data.keplrFeatures?.includes('eth-address-gen') ?? network.slip44 === 60)
                 ? {type: 'ETHERMINT'} : {})
         }
     }

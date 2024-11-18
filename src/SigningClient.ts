@@ -1,14 +1,14 @@
-import { type NetworkData, type Message } from './types'
+import type { NetworkData, Message } from './types'
 import axios from 'axios'
 import { assertIsDeliverTxSuccess, type Coin, GasPrice } from '@cosmjs/stargate'
 import { toBase64 } from '@cosmjs/encoding'
 import { Fee, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { parseTxResult, sleep, isEmpty, coin } from './util'
-import { type DefaultSigner } from './Signers'
-import { type DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient'
+import type { DefaultSigner } from './Signers'
+import type { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient'
 import * as mathjs from 'mathjs'
 import _ from "lodash";
-import {Wallet} from "./Wallet";
+import type {Wallet} from "./Wallet";
 
 export class SigningClient {
   constructor (
@@ -16,7 +16,7 @@ export class SigningClient {
     private readonly defaultGasPrice: GasPrice,
     private readonly signer: DefaultSigner,
     private readonly wallet: Wallet,
-    private readonly defaultGasModifier: number = 1.5
+    private readonly defaultGasModifier = 1.5
   ) {
   }
 
@@ -63,11 +63,11 @@ export class SigningClient {
 
         return value
       })
-      .catch((error) => {
+      .catch((error: any) => {
         if (error.response?.status === 404) {
           throw new Error('Account does not exist on chain')
         } else {
-          throw error
+          throw new Error('Unknown error when getting account')
         }
       })
   }
@@ -91,7 +91,7 @@ export class SigningClient {
     }
   }
 
-  getFee(gas?: number, gasPrice?: GasPrice | string | undefined): Fee {
+  getFee(gas?: number, gasPrice?: GasPrice | string  ): Fee {
     if (gas === undefined || gas === 0) {
       gas = 200000
     }
@@ -104,7 +104,7 @@ export class SigningClient {
     })
   }
 
-  async signAndBroadcastWithoutBalanceCheck(address: string, msgs: Message[], gas?: number, memo?: string, gasPrice?: GasPrice | string | undefined) {
+  async signAndBroadcastWithoutBalanceCheck(address: string, msgs: Message[], gas?: number, memo?: string, gasPrice?: GasPrice | string  ) {
     const defaultOptions = _.cloneDeep(this.wallet.getOptions())
     this.wallet.setOptions({ sign: { disableBalanceCheck: true } })
     try {
@@ -114,19 +114,19 @@ export class SigningClient {
     }
   }
 
-  async signAndBroadcast(address: string, messages: Message[], gas?: number, memo?: string, gasPrice?: GasPrice | string | undefined) {
+  async signAndBroadcast(address: string, messages: Message[], gas?: number, memo?: string, gasPrice?: GasPrice | string  ) {
     if (!gas)
-      gas = await this.simulate(address, messages, memo);
+      {gas = await this.simulate(address, messages, memo);}
     const fee = this.getFee(gas, gasPrice);
     const txBody = await this.sign(address, messages, fee, memo)
 
-    return this.broadcast(txBody)
+    return await this.broadcast(txBody)
   }
 
-  async sign(address: string, messages: Message[], fee: Fee, memo?: string){
+  async sign(address: string, messages: Message[], fee: Fee, memo?: string) {
     const account = await this.getAccount(address)
 
-    return this.signer.sign(account, messages, fee, memo)
+    return await this.signer.sign(account, messages, fee, memo)
   }
 
   async simulate(address: string, messages: Message[], memo?: string, modifier?: number) {
@@ -138,7 +138,7 @@ export class SigningClient {
         tx_bytes: toBase64(TxRaw.encode(txBody).finish()),
       }).then(el => el.data.gas_info.gas_used)
       // @ts-ignore
-      return (parseInt(estimate * (modifier || this.defaultGasModifier)));
+      return (parseInt(estimate * (modifier ?? this.defaultGasModifier)));
     } catch (error: any) {
       throw new Error(error.response?.data?.message || error.message)
     }
@@ -164,7 +164,7 @@ export class SigningClient {
 
         return parseTxResult(response.data.tx_response)
       } catch {
-        return pollForTx(txId);
+        return await pollForTx(txId);
       }
     };
 
@@ -174,7 +174,7 @@ export class SigningClient {
     })
     const result = parseTxResult(response.data.tx_response)
     assertIsDeliverTxSuccess(result)
-    return pollForTx(result.transactionHash).then(
+    return await pollForTx(result.transactionHash).then(
         (value) => {
           clearTimeout(txPollTimeout);
           assertIsDeliverTxSuccess(value)
