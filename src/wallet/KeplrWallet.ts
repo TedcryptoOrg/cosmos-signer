@@ -1,7 +1,7 @@
 import BaseWallet from "./BaseWallet";
 import _ from "lodash";
 
-export default class KeplrWallet extends BaseWallet {
+export class KeplrWallet extends BaseWallet {
     public name = 'keplr'
     public label = 'Keplr Wallet'
     public keychangeEvent = 'keplr_keystorechange'

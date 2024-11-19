@@ -1,7 +1,7 @@
 import BaseWallet, {type Provider, type WalletClient} from "./BaseWallet";
-import type {NetworkData} from "../types";
+import type {NetworkData} from "../types/NetworkData";
 
-export default class CosmostationWallet extends BaseWallet {
+export class CosmostationWallet extends BaseWallet {
     public name = 'cosmostation'
     public label = 'Cosmostation Wallet'
     public keychangeEvent = 'cosmostation_keystorechange'

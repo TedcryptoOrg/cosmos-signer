@@ -1,9 +1,9 @@
 import { Slip10RawIndex, pathToString } from '@cosmjs/crypto'
 import BaseWallet, {type Provider, type ProviderKey, type WalletClient} from "./BaseWallet";
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing'
-import type {NetworkData} from "../types";
+import type {NetworkData} from "../types/NetworkData";
 
-export default class OfflineWallet extends BaseWallet {
+export class OfflineWallet extends BaseWallet {
     public name = 'offline'
     public label = 'Offline Wallet'
     public keychangeEvent = 'offline_keystorechange'

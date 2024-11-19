@@ -1,14 +1,18 @@
-import type { NetworkData, Message } from '../types'
 import axios from 'axios'
 import { assertIsDeliverTxSuccess, type Coin, GasPrice } from '@cosmjs/stargate'
 import { toBase64 } from '@cosmjs/encoding'
 import { Fee, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-import { parseTxResult, sleep, isEmpty, coin } from '../util'
 import type { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient'
-import * as mathjs from 'mathjs'
 import _ from "lodash";
-import type {Wallet} from "../Wallet";
-import {DefaultAdapter} from "./Adapter";
+import BigNumber from 'bignumber.js';
+import {DefaultAdapter} from "./adapter/DefaultAdapter";
+import type {Wallet} from "../wallet/BaseWallet";
+import {isEmpty} from "../util/TypeUtils";
+import { sleep } from '../util/Sleep'
+import type {NetworkData} from "../types/NetworkData";
+import {coin} from "../util/Coin";
+import type {Message} from "../types/Message";
+import { parseTxResult } from '../util/TransactionHelper'
 
 export class SigningClient {
   private readonly adapter: DefaultAdapter;
@@ -80,13 +84,9 @@ export class SigningClient {
   calculateFee (gasLimit: number, gasPrice: GasPrice | string): { amount: Coin[], gas: bigint } {
     const processedGasPrice = typeof gasPrice === 'string' ? GasPrice.fromString(gasPrice) : gasPrice
     const { denom, amount: gasPriceAmount } = processedGasPrice
-    const amount = mathjs.ceil(mathjs.bignumber(
-        // @ts-ignore
-        mathjs.multiply(
-            mathjs.bignumber(gasPriceAmount.toString()),
-            mathjs.bignumber(gasLimit.toString())
-        )
-    ))
+    const amount = new BigNumber(gasPriceAmount.toString())
+        .multipliedBy(new BigNumber(gasLimit.toString()))
+        .integerValue(BigNumber.ROUND_CEIL);
 
     return {
       amount: [coin(amount, denom)],
@@ -117,7 +117,7 @@ export class SigningClient {
     }
   }
 
-  async signAndBroadcast(address: string, messages: Message[], gas?: number, memo?: string, gasPrice?: GasPrice | string  ) {
+  async signAndBroadcast(address: string, messages: Message[], gas?: number, memo?: string, gasPrice?: GasPrice | string  ): Promise<DeliverTxResponse> {
     if (!gas)
       {gas = await this.simulate(address, messages, memo);}
     const fee = this.getFee(gas, gasPrice);
@@ -126,13 +126,13 @@ export class SigningClient {
     return await this.broadcast(txBody)
   }
 
-  async sign(address: string, messages: Message[], fee: Fee, memo?: string) {
+  async sign(address: string, messages: Message[], fee: Fee, memo?: string): Promise<any> {
     const account = await this.getAccount(address)
 
     return await this.adapter.sign(account, messages, fee, memo)
   }
 
-  async simulate(address: string, messages: Message[], memo?: string, modifier?: number) {
+  async simulate(address: string, messages: Message[], memo?: string, modifier?: number): Promise<number> {
     const account = await this.getAccount(address)
     const fee = this.getFee(100_000)
     const txBody = await this.adapter.simulate(account, messages, fee, memo)
@@ -140,6 +140,7 @@ export class SigningClient {
       const estimate = await axios.post(this.network.restUrl + '/cosmos/tx/v1beta1/simulate', {
         tx_bytes: toBase64(TxRaw.encode(txBody).finish()),
       }).then(el => el.data.gas_info.gas_used)
+
       // @ts-ignore
       return (parseInt(estimate * (modifier ?? this.defaultGasModifier)));
     } catch (error: any) {
@@ -188,16 +189,5 @@ export class SigningClient {
           return error
         },
     )
-  }
-
-  parseTxResult(result: any){
-    return {
-      code: result.code,
-      height: result.height,
-      rawLog: result.raw_log,
-      transactionHash: result.txhash,
-      gasUsed: result.gas_used,
-      gasWanted: result.gas_wanted,
-    }
   }
 }

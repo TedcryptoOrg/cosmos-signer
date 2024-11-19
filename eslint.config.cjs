@@ -28,6 +28,7 @@ module.exports = (async function config() {
                 'babel.config.js',
                 'node_modules/',
                 'tests/**/*.ts',
+                'lib/**/*',
             ]
         },
     ]

@@ -1,5 +1,4 @@
 import { AuthInfo, type Fee, TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx.js";
-import type {Message, Account, NetworkData} from "../../types";
 import {SignMode} from "cosmjs-types/cosmos/tx/signing/v1beta1/signing";
 import {
     createAuthzAminoConverters,
@@ -10,7 +9,6 @@ import {
     createStakingAminoConverters,
     AminoTypes,
 } from "@cosmjs/stargate";
-import {createAuthzExecAminoConverters} from "../../Converters";
 import {PubKey} from "cosmjs-types/cosmos/crypto/secp256k1/keys";
 import { defaultRegistryTypes as defaultStargateTypes } from '@cosmjs/stargate/build/signingstargateclient'
 import { fromBase64 } from '@cosmjs/encoding'
@@ -18,7 +16,11 @@ import {type AminoMsg, makeSignDoc as makeAminoSignDoc} from "@cosmjs/amino";
 import { makeSignDoc, Registry } from "@cosmjs/proto-signing";
 import _ from "lodash";
 import Long from "long";
-import type {Wallet} from "../../Wallet";
+import type {Wallet} from "../../wallet/BaseWallet";
+import type {NetworkData} from "../../types/NetworkData";
+import {createAuthzExecAminoConverters, createAuthzAminoConverters as customCreateAuthzAminoConverters} from "../../converters/Authz";
+import type {Account} from "../../types/Account";
+import type {Message} from "../../types/Message";
 
 export class DefaultAdapter {
     private readonly registry: Registry
@@ -39,40 +41,49 @@ export class DefaultAdapter {
             ...createIbcAminoConverters(),
         }
         const aminoTypes = new AminoTypes(defaultConverters)
-        this.aminoTypes = new AminoTypes({...defaultConverters, ...createAuthzExecAminoConverters(this.registry, aminoTypes)})
+        this.aminoTypes = new AminoTypes({
+            ...defaultConverters,
+            ...customCreateAuthzAminoConverters(),
+            ...createAuthzExecAminoConverters(this.registry, aminoTypes)
+        })
     }
 
     async sign(account: Account, messages: Message[], fee: Fee, memo?: string): Promise<any> {
         const { chainId } = this.network
         const { account_number: accountNumber, sequence, address } = account
-        const txBodyBytes = this.makeBodyBytes(messages, memo)
         let aminoMsgs = undefined
+
         try {
             aminoMsgs = this.convertToAmino(messages)
         } catch (e) { console.log(e) }
+
         if(aminoMsgs && this.wallet.signAminoSupport()){
             // Sign as amino if possible for Ledger and Keplr support
             const signDoc = makeAminoSignDoc(aminoMsgs, {gas: fee.gasLimit.toString(), amount: fee.amount}, chainId, memo, accountNumber, sequence);
             const { signature, signed } = await this.wallet.signAmino(address, signDoc);
             const authInfoBytes = await this.makeAuthInfoBytes(account, fee, SignMode.SIGN_MODE_LEGACY_AMINO_JSON)
+
             return {
                 bodyBytes: this.makeBodyBytes(messages, signed.memo),
                 authInfoBytes,
                 signatures: [Buffer.from(signature.signature, "base64")],
             }
-        }else if(this.wallet.signDirectSupport()){
+        }
+
+        if(this.wallet.signDirectSupport()){
             // Sign using standard protobuf messages
             const authInfoBytes = await this.makeAuthInfoBytes(account, fee, SignMode.SIGN_MODE_DIRECT)
-            const signDoc = makeSignDoc(txBodyBytes, authInfoBytes, chainId, accountNumber);
+            const signDoc = makeSignDoc(this.makeBodyBytes(messages, memo), authInfoBytes, chainId, accountNumber);
             const { signature, signed } = await this.wallet.signDirect(address, signDoc);
+
             return {
                 bodyBytes: signed.bodyBytes,
                 authInfoBytes: signed.authInfoBytes,
                 signatures: [fromBase64(signature.signature)],
             }
-        }else{
-            throw new Error('Unable to sign message with this wallet/signer')
         }
+
+        throw new Error('Unable to sign message with this wallet/signer')
     }
 
     async simulate(account: Account, messages: Message[], fee: Fee, memo?: string): Promise<any> {
@@ -100,7 +111,7 @@ export class DefaultAdapter {
                 if(preventedTypes.length > 0){
                     throw new Error(`This chain does not support amino conversion for Authz Exec with message types: ${preventedTypes.join(', ')}`)
                 }
-            }else if(this.network.aminoPreventTypes.some(prevent => message.typeUrl.match(_.escapeRegExp(prevent)))){
+            }else if(this.network.aminoPreventTypes.some((prevent: any) => message.typeUrl.match(_.escapeRegExp(prevent)))){
                 throw new Error(`This chain does not support amino conversion for message type: ${message.typeUrl}`)
             }
             let aminoMessage = this.aminoTypes.toAmino(message)

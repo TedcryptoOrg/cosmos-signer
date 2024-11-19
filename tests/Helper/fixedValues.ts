@@ -1,6 +1,5 @@
 import {Chain, ChainDirectory} from "@tedcryptoorg/cosmos-directory";
-import {DefaultAdapter, Network, NetworkData, SigningClient} from "../../src";
-import OfflineWallet from "../../src/Wallet/OfflineWallet";
+import {DefaultAdapter, Network, NetworkData, SigningClient, OfflineWallet} from "../../src";
 import {GasPrice} from "@cosmjs/stargate";
 
 export const TEST_MNEMONIC = 'online lottery matter blanket couple recall scorpion fat jungle student balance way angle upon title gap teach video farm skirt despair mesh cliff field';

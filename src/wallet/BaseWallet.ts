@@ -1,5 +1,5 @@
-import type {NetworkData} from "../types";
 import type {Logger} from "../Logger";
+import type {NetworkData} from "../types/NetworkData";
 
 export interface Wallet {
     available: () => boolean

@@ -6,6 +6,8 @@
     "module": "CommonJS",
     "moduleResolution": "Node",
     "outDir": "../lib/cjs",
-    "declarationDir": "../lib/cjs/types"
+    "declarationDir": "../lib/cjs/types",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   }
 }
