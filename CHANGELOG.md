@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0-beta.0](https://github.com/TedcryptoOrg/cosmos-signer/compare/v2.0.0-beta.0...v3.0.0-beta.0) (2024-11-19)
+## [2.0.0-beta.0](https://github.com/TedcryptoOrg/cosmos-signer/compare/v2.0.0-beta.0) (2024-11-19)
 
 
 ### ⚠ BREAKING CHANGES
