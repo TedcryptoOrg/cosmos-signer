@@ -16,7 +16,6 @@
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
     "prepublishOnly": "npm run build",
-    "prepare": "npm run build",
     "generate-barrels": "barrelsby --directory src --delete"
   },
   "keywords": [
