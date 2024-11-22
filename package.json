@@ -34,7 +34,7 @@
     "@cosmjs/stargate": "^0.32.4",
     "@ethersproject/wallet": "^5.7.0",
     "@evmos/address-converter": "^0.1.9",
-    "@tedcryptoorg/cosmos-directory": "^0.1.1",
+    "@tedcryptoorg/cosmos-directory": "^0.1.2",
     "@walletconnect/browser-utils": "^1.8.0",
     "axios": "^1.2.5",
     "axios-retry": "^4.0.0",
