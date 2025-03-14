@@ -36,7 +36,7 @@
     "@evmos/address-converter": "^0.1.9",
     "@tedcryptoorg/cosmos-directory": "^0.1.2",
     "@walletconnect/browser-utils": "^1.8.0",
-    "axios": "^1.8.2",
+    "axios": "^1.8.3",
     "axios-retry": "^4.5.0",
     "bignumber.js": "^9.1.2",
     "compare-versions": "^6.1.1",
