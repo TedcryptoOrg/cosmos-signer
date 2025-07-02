@@ -46,12 +46,12 @@
     "parse-duration": "^1.1.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.27.4",
+    "@babel/core": "^7.27.7",
     "@babel/preset-env": "^7.27.2",
     "@babel/preset-typescript": "^7.27.1",
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.14",
-    "@types/lodash": "^4.17.18",
+    "@types/lodash": "^4.17.20",
     "babel-jest": "^29.7.0",
     "barrelsby": "^2.8.1",
     "eslint-config-love": "^99.0.0",
