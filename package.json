@@ -31,7 +31,7 @@
     "url": "https://github.com/TedcryptoOrg/cosmos-signer/issues"
   },
   "dependencies": {
-    "@cosmjs/stargate": "^0.32.4",
+    "@cosmjs/stargate": "^0.37.0",
     "@ethersproject/wallet": "^5.8.0",
     "@evmos/address-converter": "^0.1.9",
     "@tedcryptoorg/cosmos-directory": "^0.1.2",
